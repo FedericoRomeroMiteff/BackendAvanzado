@@ -1,14 +1,24 @@
-const express = require("express");
-const { Server } = require("socket.io");
-const http = require("http");
-const path = require("path");
-const exphbs = require("express-handlebars");
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import path from "path";
+import { fileURLToPath } from "url";
+import { engine } from "express-handlebars";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 const io = new Server(server);
 
-app.engine("handlebars", exphbs());
+app.engine(
+  "handlebars",
+  engine({
+    extname: ".handlebars",
+    defaultLayout: false,
+  })
+);
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
