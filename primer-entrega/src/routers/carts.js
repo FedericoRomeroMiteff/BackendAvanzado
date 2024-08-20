@@ -1,19 +1,25 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const router = express.Router();
+import { Router } from "express";
+import fs from "fs";
+import path from "path";
 
-const cartsFilePath = path.join(__dirname, "cart.json");
+const router = Router();
+const cartsFilePath = path.join(process.cwd(), "dao", "carts.json");
+
 const readCartsFile = () => {
-  if (!fs.existsSync(cartsFilePath)) {
+  try {
+    const data = fs.readFileSync(cartsFilePath);
+    return JSON.parse(data);
+  } catch (error) {
     return [];
   }
-  const data = fs.readFileSync(cartsFilePath);
-  return JSON.parse(data);
 };
 
 const writeCartsFile = (data) => {
-  fs.writeFileSync(cartsFilePath, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(cartsFilePath, JSON.stringify(data, null, 2));
+  } catch (error) {
+    throw new Error("Error al escribir en el archivo de carritos");
+  }
 };
 
 router.post("/", (req, res) => {
@@ -52,4 +58,4 @@ router.post("/:cid/product/:pid", (req, res) => {
   res.json(cart);
 });
 
-module.exports = router;
+export default router;

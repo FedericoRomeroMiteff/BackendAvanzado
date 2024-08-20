@@ -1,14 +1,13 @@
-const express = require("express");
+import express from "express";
+import productsRouter from "./routers/products.js";
+import cartsRouter from "./routers/carts.js";
+
 const app = express();
-const products = require("./products");
-const cart = require("./cart");
-
 app.use(express.json());
-
-app.use("/api/products", products);
-app.use("/api/cart", cart);
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
 
 const PORT = 8080;
 app.listen(PORT, () => {
-  console.log(`Servidor online en puerto http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

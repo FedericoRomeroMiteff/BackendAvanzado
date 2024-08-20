@@ -1,20 +1,25 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const router = express.Router();
+import { Router } from "express";
+import fs from "fs";
+import path from "path";
 
-const productsFilePath = path.join(__dirname, "products.json");
+const router = Router();
+const productsFilePath = path.join(process.cwd(), "dao", "products.json");
 
 const readProductsFile = () => {
-  if (!fs.existsSync(productsFilePath)) {
+  try {
+    const data = fs.readFileSync(productsFilePath);
+    return JSON.parse(data);
+  } catch (error) {
     return [];
   }
-  const data = fs.readFileSync(productsFilePath);
-  return JSON.parse(data);
 };
 
 const writeProductsFile = (data) => {
-  fs.writeFileSync(productsFilePath, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(productsFilePath, JSON.stringify(data, null, 2));
+  } catch (error) {
+    throw new Error("Error al escribir en el archivo de productos");
+  }
 };
 
 router.get("/", (req, res) => {
@@ -90,4 +95,4 @@ router.delete("/:pid", (req, res) => {
   res.send("Producto eliminado");
 });
 
-module.exports = router;
+export default router;
