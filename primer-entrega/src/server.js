@@ -1,63 +1,50 @@
 import express from "express";
-import { createServer } from "http";
 import { Server } from "socket.io";
-import path from "path";
-import { fileURLToPath } from "url";
+import { createServer } from "http";
 import { engine } from "express-handlebars";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import path from "path";
+import productsRouter from "./routers/products.js";
+import cartsRouter from "./routers/carts.js";
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server);
+const httpServer = createServer(app);
+const io = new Server(httpServer);
 
-app.engine(
-  "handlebars",
-  engine({
-    extname: ".handlebars",
-    defaultLayout: false,
-  })
-);
+const __dirname = path.resolve();
+
+app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-let products = [];
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
 
 app.get("/", (req, res) => {
-  res.render("home", { products });
+  res.render("home", { title: "Lista de Productos" });
 });
 
 app.get("/realtimeproducts", (req, res) => {
-  res.render("realTimeProducts", { products });
-});
-
-app.post("/products", (req, res) => {
-  const { name } = req.body;
-  products.push(name);
-  io.emit("productList", products);
-  res.redirect("/realtimeproducts");
+  res.render("realTimeProducts", { title: "Productos en Tiempo Real" });
 });
 
 io.on("connection", (socket) => {
   console.log("Nuevo cliente conectado");
 
-  socket.emit("productList", products);
-
   socket.on("newProduct", (product) => {
-    products.push(product);
-    io.emit("productList", products);
+    io.emit("updateProducts", product);
   });
 
-  socket.on("deleteProduct", (index) => {
-    products.splice(index, 1);
-    io.emit("productList", products);
+  socket.on("deleteProduct", (productId) => {
+    io.emit("removeProduct", productId);
   });
 });
 
-server.listen(8080, () => {
-  console.log("Servidor online en puerto http://localhost:8080");
+const PORT = 8080;
+httpServer.listen(PORT, () => {
+  console.log(`Servidor online en puerto http://localhost:${PORT}`);
 });
+
+export { io };

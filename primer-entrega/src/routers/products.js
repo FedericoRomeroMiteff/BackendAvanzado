@@ -1,43 +1,28 @@
 import { Router } from "express";
 import fs from "fs";
 import path from "path";
+import { io } from "../server.js";
 
 const router = Router();
-const productsFilePath = path.join(process.cwd(), "dao", "products.json");
+const productsFilePath = path.join(process.cwd(), "dao", "productos.json");
 
 const readProductsFile = () => {
   try {
-    const data = fs.readFileSync(productsFilePath);
+    const data = fs.readFileSync(productsFilePath, "utf8");
     return JSON.parse(data);
   } catch (error) {
+    console.error("Error al leer el archivo de productos:", error);
     return [];
   }
 };
 
-const writeProductsFile = (data) => {
+const writeProductsFile = (products) => {
   try {
-    fs.writeFileSync(productsFilePath, JSON.stringify(data, null, 2));
+    fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2));
   } catch (error) {
-    throw new Error("Error al escribir en el archivo de productos");
+    console.error("Error al escribir en el archivo de productos:", error);
   }
 };
-
-router.get("/", (req, res) => {
-  const { limit } = req.query;
-  let products = readProductsFile();
-  if (limit) {
-    products = products.slice(0, parseInt(limit));
-  }
-  res.json(products);
-});
-
-router.get("/:pid", (req, res) => {
-  const products = readProductsFile();
-  const product = products.find((p) => p.id === req.params.pid);
-  if (!product)
-    return res.status(404).json({ error: "Producto no encontrado" });
-  res.json(product);
-});
 
 router.post("/", (req, res) => {
   const {
@@ -69,29 +54,21 @@ router.post("/", (req, res) => {
 
   products.push(newProduct);
   writeProductsFile(products);
+
+  io.emit("updateProducts", newProduct);
   res.status(201).json(newProduct);
-});
-
-router.put("/:pid", (req, res) => {
-  const products = readProductsFile();
-  const index = products.findIndex((p) => p.id === req.params.pid);
-  if (index === -1)
-    return res.status(404).json({ error: "Producto no encontrado" });
-
-  const updatedProduct = {
-    ...products[index],
-    ...req.body,
-    id: products[index].id,
-  };
-  products[index] = updatedProduct;
-  writeProductsFile(products);
-  res.json(updatedProduct);
 });
 
 router.delete("/:pid", (req, res) => {
   let products = readProductsFile();
+  const product = products.find((p) => p.id === req.params.pid);
+  if (!product)
+    return res.status(404).json({ error: "Producto no encontrado" });
+
   products = products.filter((p) => p.id !== req.params.pid);
   writeProductsFile(products);
+
+  io.emit("removeProduct", req.params.pid);
   res.send("Producto eliminado");
 });
 
