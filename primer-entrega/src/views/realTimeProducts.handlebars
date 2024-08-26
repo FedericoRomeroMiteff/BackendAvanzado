@@ -10,7 +10,7 @@
     <h1>{{Lista de productos en tiempo real}}</h1>
     <ul id="product-list">
         {{#each products}}
-            <li data-id="{{id}}">{{title}} - ${{price}}</li>
+            <li data-id="{{this.id}}">{{this.title}} - ${{this.price}}</li>
         {{/each}}
     </ul>
 

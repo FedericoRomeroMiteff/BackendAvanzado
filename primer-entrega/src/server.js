@@ -21,12 +21,15 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
+app.put("/api/products/:id", (req) => {
+  req.params.id;
+});
 
-app.get("/", (req, res) => {
+app.get("/", (res) => {
   res.render("home", { title: "Lista de Productos" });
 });
 
-app.get("/realtimeproducts", (req, res) => {
+app.get("/realtimeproducts", (res) => {
   res.render("realTimeProducts", { title: "Productos en Tiempo Real" });
 });
 
