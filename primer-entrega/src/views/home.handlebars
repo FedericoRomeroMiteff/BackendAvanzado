@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{title}}</title>
-</head>
-<body>
-    <h1>{{title}}</h1>
-    <ul>
-        {{#each products}}
-            <li>{{this.title}} - ${{this.price}}</li>
-        {{/each}}
-    </ul>
-</body>
-</html>
-
+<h1>Lista de Productos</h1>
+<input type="text" id="search" placeholder="Buscar producto">
+<ul id="product-list">
+    {{#each products}}
+        <li data-id="{{this.id}}">{{this.title}} - ${{this.price}}</li>
+    {{/each}}
+</ul>
+<script src="../public/home.js"></script>

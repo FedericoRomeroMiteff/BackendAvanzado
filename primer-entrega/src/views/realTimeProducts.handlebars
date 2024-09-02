@@ -1,60 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos en Tiempo Real</title>
-</head>
+<h1>Lista de productos en tiempo real</h1>
+<ul id="product-list">
+    {{#each products}}
+        <li data-id="{{this.id}}">{{this.title}} - ${{this.price}}</li>
+    {{/each}}
+</ul>
 
-<body>
-    <h1>{{Lista de productos en tiempo real}}</h1>
-    <ul id="product-list">
-        {{#each products}}
-            <li data-id="{{this.id}}">{{this.title}} - ${{this.price}}</li>
-        {{/each}}
-    </ul>
+<h2>Agregar Producto</h2>
+<input type="text" id="title" placeholder="Nombre del producto">
+<input type="number" id="price" placeholder="Precio">
+<button onclick="addProduct()">Agregar producto</button>
 
-    <h2>Agregar Producto</h2>
-    <input type="text" id="title" placeholder="Nombre del producto">
-    <input type="number" id="price" placeholder="Precio">
-    <button onclick="addProduct()">Agregar producto</button>
+<h2>Eliminar Producto</h2>
+<input type="text" id="productId" placeholder="ID del producto">
+<button onclick="deleteProduct()">Eliminar producto</button>
 
-    <h2>Eliminar Producto</h2>
-    <input type="text" id="productId" placeholder="ID del producto">
-    <button onclick="deleteProduct()">Eliminar producto</button>
-</body>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-
-        socket.on('updateProducts', (product) => {
-            const productList = document.getElementById('product-list');
-            const newProduct = document.createElement('li');
-            newProduct.textContent = `${product.title} - $${product.price}`;
-            productList.appendChild(newProduct);
-        });
-
-        socket.on('removeProduct', (productId) => {
-            const productList = document.getElementById('product-list');
-            const productItems = productList.getElementsByTagName('li');
-            for (let item of productItems) {
-                if (item.dataset.id === productId) {
-                    productList.removeChild(item);
-                    break;
-                }
-            }
-        });
-
-        function addProduct() {
-            const title = document.getElementById('title').value;
-            const price = document.getElementById('price').value;
-            socket.emit('newProduct', { title, price });
-        }
-
-        function deleteProduct() {
-            const productId = document.getElementById('productId').value;
-            socket.emit('deleteProduct', productId);
-        }
-    </script>
-</html>
+<script src="../public/realtime.js"></script> 

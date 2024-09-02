@@ -4,7 +4,7 @@ import CartManager from "../class/CartManager.js";
 const router = Router();
 const cartManager = new CartManager();
 
-router.post("/", async (req, res) => {
+router.post("/", async (res) => {
   try {
     const newCart = await cartManager.createCart();
     res.status(201).json(newCart);

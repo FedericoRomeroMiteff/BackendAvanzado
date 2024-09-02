@@ -15,7 +15,14 @@ const io = new Server(server);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.engine("handlebars", engine({ defaultLayout: false }));
+app.engine(
+  "handlebars",
+  engine({
+    layoutsDir: path.join(__dirname, "views/layouts"),
+    defaultLayout: "main",
+    extname: ".handlebars",
+  })
+);
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
@@ -25,7 +32,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 
-app.get("/", async (req, res) => {
+app.get("/", async (res) => {
   const productManager = new ProductManager();
   try {
     const products = await productManager.getAll();
@@ -35,22 +42,32 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/real-time-products", (req, res) => {
+app.get("/real-time-products", (res) => {
   res.render("realTimeProducts", { title: "Productos en Tiempo Real" });
 });
 
 io.on("connection", (socket) => {
   console.log("Nuevo cliente conectado");
 
-  socket.on("new-product", async (product) => {
+  socket.on("newProduct", async (product) => {
     const productManager = new ProductManager();
     try {
+      await productManager.addProduct(product);
       const products = await productManager.getAll();
-      products.push(product);
-      await productManager.saveProducts(products);
-      io.emit("update-products", products);
+      io.emit("updateProducts", products);
     } catch (error) {
       console.error("Error al agregar producto:", error);
+    }
+  });
+
+  socket.on("deleteProduct", async (productId) => {
+    const productManager = new ProductManager();
+    try {
+      await productManager.deleteProduct(productId);
+      const products = await productManager.getAll();
+      io.emit("updateProducts", products);
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
     }
   });
 });
