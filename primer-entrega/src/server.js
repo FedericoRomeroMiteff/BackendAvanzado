@@ -32,17 +32,17 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 
-app.get("/", async (res) => {
+app.get("/", async (req, res) => {
   const productManager = new ProductManager();
   try {
-    const products = await productManager.getAll();
+    const products = await productManager.getProducts();
     res.render("home", { title: "Lista de Productos", products });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get("/real-time-products", (res) => {
+app.get("/real-time-products", (req, res) => {
   res.render("realTimeProducts", { title: "Productos en Tiempo Real" });
 });
 
@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
     const productManager = new ProductManager();
     try {
       await productManager.addProduct(product);
-      const products = await productManager.getAll();
+      const products = await productManager.getProducts();
       io.emit("updateProducts", products);
     } catch (error) {
       console.error("Error al agregar producto:", error);
@@ -64,10 +64,21 @@ io.on("connection", (socket) => {
     const productManager = new ProductManager();
     try {
       await productManager.deleteProduct(productId);
-      const products = await productManager.getAll();
+      const products = await productManager.getProducts();
       io.emit("updateProducts", products);
     } catch (error) {
       console.error("Error al eliminar producto:", error);
+    }
+  });
+
+  socket.on("modifyProduct", async (modifiedProduct) => {
+    const productManager = new ProductManager();
+    try {
+      await productManager.updateProduct(modifiedProduct.id, modifiedProduct);
+      const products = await productManager.getProducts();
+      io.emit("updateProducts", products);
+    } catch (error) {
+      console.error("Error al modificar producto:", error);
     }
   });
 });

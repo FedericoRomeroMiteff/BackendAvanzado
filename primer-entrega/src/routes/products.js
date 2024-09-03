@@ -4,9 +4,9 @@ import ProductManager from "../class/ProductManager.js";
 const router = express.Router();
 const productManager = new ProductManager();
 
-router.get("/", async (res) => {
+router.get("/", async (req, res) => {
   try {
-    const products = await productManager.getAll();
+    const products = await productManager.getProducts();
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
