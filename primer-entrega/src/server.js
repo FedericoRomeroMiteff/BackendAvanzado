@@ -11,19 +11,11 @@ import ProductManager from "./class/ProductManager.js";
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const productManager = new ProductManager();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.engine(
-  "handlebars",
-  engine({
-    layoutsDir: path.join(__dirname, "views/layouts"),
-    defaultLayout: "main",
-    extname: ".handlebars",
-  })
-);
+app.engine("handlebars", engine({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
@@ -32,6 +24,17 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
+
+const productManager = new ProductManager();
+
+app.get("/", async (req, res) => {
+  try {
+    const products = await productManager.getProducts();
+    res.render("home", { title: "Lista de Productos", products });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.get("/real-time-products", async (req, res) => {
   try {
