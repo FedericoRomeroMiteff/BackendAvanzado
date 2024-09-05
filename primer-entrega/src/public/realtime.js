@@ -1,49 +1,39 @@
 const socket = io();
 
+socket.on("updateProducts", (products) => {
+  const productList = document.getElementById("product-list");
+  productList.innerHTML = "";
+  products.forEach((product) => {
+    const productItem = document.createElement("li");
+    productItem.dataset.id = product.id;
+    productItem.innerHTML = `${product.title} - $${product.price} 
+            <button onclick="deleteProduct('${product.id}')">Eliminar</button>
+            <button onclick="editProduct('${product.id}', '${product.title}', '${product.price}')">Modificar</button>`;
+    productList.appendChild(productItem);
+  });
+});
+
 function addProduct() {
   const title = document.getElementById("title").value;
   const price = document.getElementById("price").value;
   socket.emit("newProduct", { title, price });
 }
 
-function deleteProduct(productId) {
-  socket.emit("deleteProduct", productId);
+function deleteProduct(id) {
+  socket.emit("deleteProduct", id);
 }
 
-function showUpdateForm(id, title, price) {
-  document.getElementById("update-form").style.display = "block";
-  document.getElementById("update-title").value = title;
-  document.getElementById("update-price").value = price;
-  document.getElementById("update-form").dataset.productId = id;
+function editProduct(id, title, price) {
+  document.getElementById("edit-id").value = id;
+  document.getElementById("edit-title").value = title;
+  document.getElementById("edit-price").value = price;
+  document.getElementById("edit-form").style.display = "block";
 }
 
-function modifyProduct() {
-  const id = document.getElementById("update-form").dataset.productId;
-  const title = document.getElementById("update-title").value;
-  const price = document.getElementById("update-price").value;
-  socket.emit("modifyProduct", { id: parseInt(id), title, price });
+function saveProduct() {
+  const id = document.getElementById("edit-id").value;
+  const title = document.getElementById("edit-title").value;
+  const price = document.getElementById("edit-price").value;
+  socket.emit("updateProduct", { id, title, price });
+  document.getElementById("edit-form").style.display = "none";
 }
-
-socket.on("updateProducts", (products) => {
-  const productList = document.getElementById("product-list");
-  productList.innerHTML = "";
-  products.forEach((product) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = `${product.title} - $${product.price}`;
-    listItem.dataset.id = product.id;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Eliminar";
-    deleteButton.onclick = () => deleteProduct(product.id);
-
-    const modifyButton = document.createElement("button");
-    modifyButton.textContent = "Modificar";
-    modifyButton.onclick = () =>
-      showUpdateForm(product.id, product.title, product.price);
-
-    listItem.appendChild(deleteButton);
-    listItem.appendChild(modifyButton);
-
-    productList.appendChild(listItem);
-  });
-});

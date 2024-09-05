@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos en Tiempo Real</title>
 </head>
+
 <body>
     <h1>Lista de productos en tiempo real</h1>
     <ul id="product-list">
@@ -12,7 +13,7 @@
             <li data-id="{{this.id}}">
                 {{this.title}} - ${{this.price}}
                 <button onclick="deleteProduct('{{this.id}}')">Eliminar</button>
-                <button onclick="showUpdateForm('{{this.id}}', '{{this.title}}', '{{this.price}}')">Modificar</button>
+                <button onclick="editProduct('{{this.id}}', '{{this.title}}', '{{this.price}}')">Modificar</button>
             </li>
         {{/each}}
     </ul>
@@ -22,11 +23,12 @@
     <input type="number" id="price" placeholder="Precio">
     <button onclick="addProduct()">Agregar producto</button>
 
-    <div id="update-form" style="display: none;">
+    <div id="edit-form" style="display:none;">
         <h2>Modificar Producto</h2>
-        <input type="text" id="update-title" placeholder="Nuevo nombre del producto">
-        <input type="number" id="update-price" placeholder="Nuevo precio">
-        <button onclick="modifyProduct()">Guardar cambios</button>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="edit-title" placeholder="Nombre del producto">
+        <input type="number" id="edit-price" placeholder="Precio">
+        <button onclick="saveProduct()">Guardar cambios</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>

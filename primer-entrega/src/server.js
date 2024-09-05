@@ -11,6 +11,7 @@ import ProductManager from "./class/ProductManager.js";
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const productManager = new ProductManager();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,27 +33,21 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 
-app.get("/", async (req, res) => {
-  const productManager = new ProductManager();
+app.get("/real-time-products", async (req, res) => {
   try {
     const products = await productManager.getProducts();
-    res.render("home", { title: "Lista de Productos", products });
+    res.render("realTimeProducts", { products });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get("/real-time-products", (req, res) => {
-  res.render("realTimeProducts", { title: "Productos en Tiempo Real" });
-});
-
 io.on("connection", (socket) => {
   console.log("Nuevo cliente conectado");
 
-  socket.on("newProduct", async (product) => {
-    const productManager = new ProductManager();
+  socket.on("newProduct", async (data) => {
     try {
-      await productManager.addProduct(product);
+      const newProduct = await productManager.addProduct(data);
       const products = await productManager.getProducts();
       io.emit("updateProducts", products);
     } catch (error) {
@@ -60,10 +55,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("deleteProduct", async (productId) => {
-    const productManager = new ProductManager();
+  socket.on("deleteProduct", async (id) => {
     try {
-      await productManager.deleteProduct(productId);
+      await productManager.deleteProduct(id);
       const products = await productManager.getProducts();
       io.emit("updateProducts", products);
     } catch (error) {
@@ -71,10 +65,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("modifyProduct", async (modifiedProduct) => {
-    const productManager = new ProductManager();
+  socket.on("modifyProduct", async (data) => {
     try {
-      await productManager.updateProduct(modifiedProduct.id, modifiedProduct);
+      await productManager.updateProduct(data.id, data);
       const products = await productManager.getProducts();
       io.emit("updateProducts", products);
     } catch (error) {

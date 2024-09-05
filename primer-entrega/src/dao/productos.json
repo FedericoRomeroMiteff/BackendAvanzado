@@ -31,5 +31,10 @@
     "stock": "150",
     "category": "Remeras",
     "thumbnails": []
+  },
+  {
+    "title": "Nuevo Producto",
+    "price": 100,
+    "id": 1725456898277
   }
 ]
