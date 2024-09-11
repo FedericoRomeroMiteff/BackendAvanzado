@@ -1,42 +1,88 @@
 const socket = io();
 
-function addProduct() {
-  const title = document.getElementById("title").value;
-  const price = document.getElementById("price").value;
+socket.on("update-products", (products) => {
+  updateProductList(products);
+});
 
-  if (title && price) {
-    socket.emit("newProduct", { title, price });
-  } else {
-    alert("Por favor, complete todos los campos.");
-  }
-}
+socket.on("remove-product", (productId) => {
+  removeProductFromList(productId);
+});
 
-function deleteProduct(productId) {
-  socket.emit("deleteProduct", productId);
-}
-
-function modifyProduct() {
-  const productId = document.getElementById("modProductId").value;
-  const title = document.getElementById("modTitle").value;
-  const price = document.getElementById("modPrice").value;
-
-  if (productId && title && price) {
-    socket.emit("modifyProduct", { id: productId, title, price });
-  } else {
-    alert("Por favor, complete todos los campos.");
-  }
-}
-
-socket.on("updateProducts", (products) => {
+function updateProductList(products) {
   const productList = document.getElementById("product-list");
+
   productList.innerHTML = "";
 
   products.forEach((product) => {
     const productItem = document.createElement("li");
-    productItem.textContent = `${product.title} - $${product.price}`;
-    productItem.setAttribute("data-id", product.id);
-    productItem.innerHTML += `<button onclick="deleteProduct(${product.id})">Eliminar</button>`;
-    productItem.innerHTML += `<button onclick="modifyProduct(${product.id})">Modificar</button>`;
+
+    productItem.innerHTML = `${product.title} - $${product.price}`;
+
+    productItem.appendChild(createDeleteButton(product.id));
+    productItem.appendChild(createEditButton(product));
+
     productList.appendChild(productItem);
   });
+}
+
+function removeProductFromList(productId) {
+  const productList = document.getElementById("product-list");
+
+  const productItems = productList.getElementsByTagName("li");
+
+  for (let item of productItems) {
+    if (item.dataset.id === productId) {
+      productList.removeChild(item);
+      break;
+    }
+  }
+}
+
+function createDeleteButton(productId) {
+  const deleteButton = document.createElement("button");
+
+  deleteButton.innerHTML = "Eliminar";
+
+  deleteButton.addEventListener("click", () => {
+    socket.emit("delete-product", productId);
+  });
+
+  return deleteButton;
+}
+
+function createEditButton(product) {
+  const editButton = document.createElement("button");
+
+  editButton.innerHTML = "Modificar";
+
+  editButton.addEventListener("click", () => {
+    const newTitle = prompt("Nuevo título del producto:", product.title);
+    const newPrice = prompt("Nuevo precio del producto:", product.price);
+
+    if (newTitle && newPrice) {
+      socket.emit("update-product", {
+        id: product.id,
+        title: newTitle,
+        price: newPrice,
+      });
+    }
+  });
+
+  return editButton;
+}
+
+const addProductForm = document.getElementById("add-product-form");
+addProductForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const titleInput = document.getElementById("title").value;
+  const priceInput = document.getElementById("price").value;
+
+  socket.emit("new-product", {
+    title: titleInput,
+    price: priceInput,
+  });
+
+  document.getElementById("title").value = "";
+  document.getElementById("price").value = "";
 });

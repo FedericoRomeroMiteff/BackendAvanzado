@@ -1,47 +1,71 @@
 const socket = io();
 
 socket.on("updateProducts", (products) => {
-  const productList = document.getElementById("product-list");
-  productList.innerHTML = "";
-  products.forEach((product) => {
-    const productItem = document.createElement("li");
-    productItem.dataset.id = product.id;
-    productItem.innerHTML = `${product.title} - $${product.price} 
-            <button onclick="deleteProduct('${product.id}')">Eliminar</button>
-            <button onclick="editProduct('${product.id}', '${product.title}', '${product.price}')">Modificar</button>`;
-    productList.appendChild(productItem);
-  });
+  updateProductList(products);
 });
 
-function addProduct() {
-  const title = document.getElementById("title").value;
-  const price = document.getElementById("price").value;
-  if (title && price) {
-    socket.emit("newProduct", { title, price });
-  } else {
-    alert("Por favor, completa todos los campos.");
-  }
+function updateProductList(products) {
+  const productList = document.getElementById("product-list");
+
+  productList.innerHTML = "";
+
+  products.forEach((product) => {
+    const productItem = document.createElement("li");
+
+    productItem.innerHTML = `${product.title} - $${product.price}`;
+
+    productItem.appendChild(createDeleteButton(product.id));
+    productItem.appendChild(createEditButton(product));
+
+    productList.appendChild(productItem);
+  });
 }
 
-function deleteProduct(id) {
-  socket.emit("deleteProduct", id);
+function createDeleteButton(productId) {
+  const deleteButton = document.createElement("button");
+
+  deleteButton.innerHTML = "Eliminar";
+
+  deleteButton.addEventListener("click", () => {
+    socket.emit("deleteProduct", productId);
+  });
+
+  return deleteButton;
 }
 
-function editProduct(id, title, price) {
-  document.getElementById("edit-id").value = id;
-  document.getElementById("edit-title").value = title;
-  document.getElementById("edit-price").value = price;
-  document.getElementById("edit-form").style.display = "block";
+function createEditButton(product) {
+  const editButton = document.createElement("button");
+
+  editButton.innerHTML = "Modificar";
+
+  editButton.addEventListener("click", () => {
+    const newTitle = prompt("Nuevo título del producto:", product.title);
+    const newPrice = prompt("Nuevo precio del producto:", product.price);
+
+    if (newTitle && newPrice) {
+      socket.emit("updateProduct", {
+        id: product.id,
+        title: newTitle,
+        price: newPrice,
+      });
+    }
+  });
+
+  return editButton;
 }
 
-function saveProduct() {
-  const id = document.getElementById("edit-id").value;
-  const title = document.getElementById("edit-title").value;
-  const price = document.getElementById("edit-price").value;
-  if (id && title && price) {
-    socket.emit("updateProduct", { id, title, price });
-    document.getElementById("edit-form").style.display = "none";
-  } else {
-    alert("Por favor, completa todos los campos.");
-  }
-}
+const addProductForm = document.getElementById("add-product-form");
+addProductForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const titleInput = document.getElementById("title").value;
+  const priceInput = document.getElementById("price").value;
+
+  socket.emit("newProduct", {
+    title: titleInput,
+    price: priceInput,
+  });
+
+  document.getElementById("title").value = "";
+  document.getElementById("price").value = "";
+});

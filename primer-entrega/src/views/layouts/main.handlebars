@@ -3,10 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}}</title>
+    <title>{{title}}</title> 
+    <link rel="stylesheet" href="/styles/main.css"> 
+    <script defer src="../public/home.js"></script> 
+    <script defer src="../public/realtime.js"></script> 
 </head>
 <body>
-    {{{body}}} 
-    <script src="/socket.io/socket.io.js"></script>
+    <header>
+        <h1>{{title}}</h1> 
+        <nav>
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/real-time-products">Productos en Tiempo Real</a></li> <!-- Enlace a la vista de productos en tiempo real -->
+                <li><a href="/products">Productos</a></li> <!-- Enlace a la vista de todos los productos -->
+                <li><a href="/carts">Carritos</a></li> <!-- Enlace a la vista de carritos -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {{{body}}} 
+    </main>
+
+    <footer>
+        
+    </footer>
 </body>
 </html>

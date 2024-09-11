@@ -1,37 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos en Tiempo Real</title>
-</head>
 
-<body>
-    <h1>Lista de productos en tiempo real</h1>
-    <ul id="product-list">
-        {{#each products}}
-            <li data-id="{{this.id}}">
-                {{this.title}} - ${{this.price}}
-                <button onclick="deleteProduct('{{this.id}}')">Eliminar</button>
-                <button onclick="editProduct('{{this.id}}', '{{this.title}}', '{{this.price}}')">Modificar</button>
-            </li>
-        {{/each}}
-    </ul>
 
-    <h2>Agregar Producto</h2>
-    <input type="text" id="title" placeholder="Nombre del producto">
-    <input type="number" id="price" placeholder="Precio">
-    <button onclick="addProduct()">Agregar producto</button>
+<h2>Productos en Tiempo Real</h2> 
 
-    <div id="edit-form" style="display:none;">
-        <h2>Modificar Producto</h2>
-        <input type="hidden" id="edit-id">
-        <input type="text" id="edit-title" placeholder="Nombre del producto">
-        <input type="number" id="edit-price" placeholder="Precio">
-        <button onclick="saveProduct()">Guardar cambios</button>
-    </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+<ul id="product-list">
+    {{#each products}} 
+        <li data-id="{{this.id}}">
+            {{this.title}} - ${{this.price}} 
+            <button onclick="deleteProduct({{this.id}})">Eliminar</button> 
+            <button onclick="editProduct({{this.id}})">Modificar</button> 
+        </li>
+    {{/each}}
+</ul>
+
+
+<h2>Agregar Nuevo Producto</h2>
+<form id="add-product-form">
+    <input type="text" id="product-title" placeholder="Nombre del producto" required> 
+    <input type="number" id="product-price" placeholder="Precio" step="0.01" required> 
+    <button type="submit">Agregar Producto</button> 
+</form>
+
+
+<h2>Modificar Producto</h2>
+<form id="edit-product-form" style="display:none;">
+    <input type="hidden" id="edit-product-id"> 
+    <input type="text" id="edit-product-title" placeholder="Nuevo nombre del producto" required> 
+    <input type="number" id="edit-product-price" placeholder="Nuevo precio" step="0.01" required> 
+    <button type="submit">Modificar Producto</button> 
+</form>
     <script src="../public/realtime.js"></script>
 </body>
 </html>

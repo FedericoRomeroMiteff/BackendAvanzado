@@ -1,74 +1,70 @@
-import fs from "fs/promises";
-import path from "path";
+import Product from "../models/product.model.js";
 
-class ProductManager {
-  constructor() {
-    this.productsFilePath = path.resolve("dao/productos.json");
-  }
-
-  async ensureFileExists() {
-    try {
-      await fs.access(this.productsFilePath);
-    } catch (error) {
-      await fs.writeFile(this.productsFilePath, "[]");
-    }
-  }
-
-  async getProducts() {
-    await this.ensureFileExists();
-    const data = await fs.readFile(this.productsFilePath, "utf-8");
-    return JSON.parse(data);
-  }
-
+export class ProductManager {
   async addProduct(product) {
     try {
-      const products = await this.getProducts();
-      console.log("Productos antes de agregar:", products);
-
-      const exists = products.some((p) => p.title === product.title);
-      if (exists) {
+      const existingProduct = await Product.findOne({ title: product.title });
+      if (existingProduct) {
         throw new Error("El producto ya existe");
       }
 
-      product.id = Date.now();
-      products.push(product);
-      console.log("Productos después de agregar:", products);
-
-      await fs.writeFile(productFilePath, JSON.stringify(products, null, 2));
-      console.log("Producto guardado exitosamente.");
-
-      return product;
+      const newProduct = new Product(product);
+      await newProduct.save();
+      return newProduct;
     } catch (error) {
-      console.error("Error al agregar el producto:", error);
+      console.error("Error al agregar producto:", error);
+      throw error;
     }
   }
 
-  async deleteProduct(productId) {
+  async getProducts(query = {}, options = {}) {
     try {
-      const products = await this.getProducts();
-      const filteredProducts = products.filter((p) => p.id !== productId);
-      await fs.writeFile(
-        productFilePath,
-        JSON.stringify(filteredProducts, null, 2)
-      );
+      const products = await Product.paginate(query, options);
+      return products;
     } catch (error) {
-      console.error("Error al eliminar el producto:", error);
+      console.error("Error al obtener productos:", error);
+      throw error;
     }
   }
 
-  async updateProduct(productId, updatedProduct) {
+  async getProductById(id) {
     try {
-      const products = await this.getProducts();
-      const productIndex = products.findIndex((p) => p.id === productId);
-      if (productIndex === -1) {
+      const product = await Product.findById(id);
+      if (!product) {
         throw new Error("Producto no encontrado");
       }
-      products[productIndex] = { ...products[productIndex], ...updatedProduct };
-      await fs.writeFile(productFilePath, JSON.stringify(products, null, 2));
+      return product;
     } catch (error) {
-      console.error("Error al modificar el producto:", error);
+      console.error("Error al obtener producto por ID:", error);
+      throw error;
+    }
+  }
+
+  async updateProduct(id, productData) {
+    try {
+      const updatedProduct = await Product.findByIdAndUpdate(id, productData, {
+        new: true,
+      });
+      if (!updatedProduct) {
+        throw new Error("Producto no encontrado");
+      }
+      return updatedProduct;
+    } catch (error) {
+      console.error("Error al actualizar producto:", error);
+      throw error;
+    }
+  }
+
+  async deleteProduct(id) {
+    try {
+      const deletedProduct = await Product.findByIdAndDelete(id);
+      if (!deletedProduct) {
+        throw new Error("Producto no encontrado");
+      }
+      return deletedProduct;
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
+      throw error;
     }
   }
 }
-
-export default ProductManager;
