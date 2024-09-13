@@ -1,0 +1,47 @@
+db.products.insertMany([
+  {
+    name: "Remera azul",
+    description: "Remera de algodón azul",
+    price: 25000,
+    category: "RemerasSE",
+    stock: 150,
+    createdAt: new Date()
+  },
+  {
+    name: "Remera negra",
+    description: "Remera de algodón negra",
+    price: 22500,
+    category: "RemerasSE",
+    stock: 150,
+    createdAt: new Date()
+  },
+  {
+    name: "Remera gris",
+    description: "Remera de algodón gris",
+    price: 22500,
+    category: "RemerasSE",
+    stock: 150,
+    createdAt: new Date()
+  },
+  {
+    name: "Remera blanca",
+    description: "Remera de algodón blanca",
+    price: 22500,
+    category: "RemerasSE",
+    stock: 150,
+    createdAt: new Date()
+  },
+]);
+
+db.carts.insertOne({
+  userId: "FedericoRomeroMiteff",
+  items: [
+      { productId: '1724694014993', quantity: 2000 },
+      { productId: '1724694043545', quantity: 1500 },
+      { productId: '1724694045372', quantity: 1000 },
+      { productId: '1724694494778', quantity: 1000 },
+      { productId: '1724694851976', quantity: 1000 }
+  ],
+  createdAt: new Date()
+})
+

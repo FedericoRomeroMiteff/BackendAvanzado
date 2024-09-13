@@ -1,6 +1,6 @@
 import Product from "../models/product.model.js";
 
-export class ProductManager {
+class ProductManager {
   async addProduct(product) {
     try {
       const existingProduct = await Product.findOne({ title: product.title });
@@ -68,3 +68,5 @@ export class ProductManager {
     }
   }
 }
+
+export default ProductManager;

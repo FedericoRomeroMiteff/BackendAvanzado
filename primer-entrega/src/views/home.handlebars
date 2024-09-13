@@ -1,20 +1,33 @@
-<h2>Lista de Productos</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productos</title>
+</head>
+<body>
+<h1>Lista de Productos</h1>
 
-
-<ul id="product-list">
-    {{#each products}} 
-        <li>
-            {{this.title}} - ${{this.price}} 
-        </li>
+<ul>
+    {{#each products}}
+    <li>
+        <h2>{{this.name}}</h2>
+        <p>Precio: ${{this.price}}</p>
+        <p>Categoría: {{this.category}}</p>
+        <button><a href="/products/{{this._id}}">Ver detalles</a></button>
+        <button><a href="/cart/add/{{this._id}}">Agregar al carrito</a></button>
+      </li>
     {{/each}}
-</ul>
+  </ul>
 
+  <div>
+    {{#if hasPrevPage}}
+      <a href="{{prevLink}}">Página anterior</a>
+    {{/if}}
+    {{#if hasNextPage}}
+      <a href="{{nextLink}}">Página siguiente</a>
+    {{/if}}
+  </div>
+</body>
+</html>
 
-<h2>Agregar Nuevo Producto</h2>
-<form id="add-product-form">
-    <input type="text" id="product-title" placeholder="Nombre del producto" required> 
-    <input type="number" id="product-price" placeholder="Precio" step="0.01" required> 
-    <button type="submit">Agregar Producto</button>
-</form>
-
-<script src="../public/home.js"></script>

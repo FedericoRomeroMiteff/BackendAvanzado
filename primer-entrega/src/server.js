@@ -7,6 +7,7 @@ import productsRouter from "./routes/products.js";
 import cartsRouter from "./routes/carts.js";
 import { fileURLToPath } from "url";
 import ProductManager from "./class/ProductManager.js";
+import { connectDB } from "./dao/connectDB.js";
 
 const app = express();
 
@@ -28,13 +29,13 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api/products", productsRouter);
-app.use("/api/carts", cartsRouter);
+app.use("/products", productsRouter);
+app.use("/carts", cartsRouter);
 
 app.get("/", async (req, res) => {
   const productManager = new ProductManager();
   try {
-    const products = await productManager.getAll();
+    const products = await productManager.getProducts();
 
     res.render("home", { title: "Lista de Productos", products });
   } catch (error) {
@@ -52,7 +53,7 @@ io.on("connection", (socket) => {
   socket.on("new-product", async (product) => {
     const productManager = new ProductManager();
     try {
-      const products = await productManager.getAll();
+      const products = await productManager.getProducts();
 
       products.push(product);
 
@@ -67,7 +68,7 @@ io.on("connection", (socket) => {
   socket.on("delete-product", async (productId) => {
     const productManager = new ProductManager();
     try {
-      const products = await productManager.getAll();
+      const products = await productManager.getProducts();
 
       const updatedProducts = products.filter((p) => p.id !== productId);
 
@@ -78,6 +79,20 @@ io.on("connection", (socket) => {
       console.error("Error al manejar la eliminación del producto:", error);
     }
   });
+});
+
+connectDB();
+
+app.get("/test-db", async (req, res) => {
+  try {
+    const products = await mongoose.connection.db
+      .collection("products")
+      .find()
+      .toArray();
+    res.send(products);
+  } catch (error) {
+    res.status(500).send("Error al obtener productos:", error.message);
+  }
 });
 
 const PORT = 8080;

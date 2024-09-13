@@ -1,8 +1,8 @@
 [
   {
     "id": "1724687514794",
-    "title": "Remera negra",
-    "description": "Remera de algodón negra",
+    "title": "Remera blanca",
+    "description": "Remera de algodón blanca",
     "code": "71090",
     "price": "1500",
     "status": true,
@@ -23,18 +23,13 @@
   },
   {
     "id": "1724687624160",
-    "title": "Remera negra",
-    "description": "Remera de algodón negra",
+    "title": "Remera azul",
+    "description": "Remera de algodón azul",
     "code": "71090",
     "price": "1500",
     "status": true,
     "stock": "150",
     "category": "Remeras",
     "thumbnails": []
-  },
-  {
-    "title": "Nuevo Producto",
-    "price": 100,
-    "id": 1725456898277
   }
 ]

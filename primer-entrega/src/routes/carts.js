@@ -1,22 +1,36 @@
-import { Router } from "express";
+import express from "express";
 import CartManager from "../class/CartManager.js";
-import ProductManager from "../class/ProductManager.js";
 
-const router = Router();
+const router = express.Router();
+
 const cartManager = new CartManager();
-const productManager = new ProductManager();
+
+router.get("/", async (req, res) => {
+  try {
+    const carts = await cartManager.getAllCarts();
+    res.json({ status: "success", payload: carts });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 router.get("/:cid", async (req, res) => {
   try {
-    const cartId = req.params.cid;
-
-    const cart = await cartManager.getCartById(cartId);
-
+    const { cid } = req.params;
+    const cart = await cartManager.getCartById(cid);
     if (!cart) {
-      return res.status(404).json({ error: "Carrito no encontrado" });
+      return res.status(404).json({ error: "Cart not found" });
     }
+    res.json({ status: "success", payload: cart });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    res.json(cart);
+router.post("/", async (req, res) => {
+  try {
+    const newCart = await cartManager.createCart();
+    res.status(201).json({ status: "success", payload: newCart });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -24,22 +38,13 @@ router.get("/:cid", async (req, res) => {
 
 router.post("/:cid/products/:pid", async (req, res) => {
   try {
-    const cartId = req.params.cid;
-    const productId = req.params.pid;
-
+    const { cid, pid } = req.params;
     const { quantity } = req.body;
-
-    if (!quantity || quantity <= 0) {
-      return res.status(400).json({ error: "Cantidad inválida" });
+    const updatedCart = await cartManager.addProductToCart(cid, pid, quantity);
+    if (!updatedCart) {
+      return res.status(404).json({ error: "Cart or product not found" });
     }
-
-    const updatedCart = await cartManager.addProductToCart(
-      cartId,
-      productId,
-      quantity
-    );
-
-    res.json(updatedCart);
+    res.json({ status: "success", payload: updatedCart });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -47,52 +52,12 @@ router.post("/:cid/products/:pid", async (req, res) => {
 
 router.delete("/:cid/products/:pid", async (req, res) => {
   try {
-    const cartId = req.params.cid;
-    const productId = req.params.pid;
-
-    const updatedCart = await cartManager.removeProductFromCart(
-      cartId,
-      productId
-    );
-
-    res.json(updatedCart);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.put("/:cid", async (req, res) => {
-  try {
-    const cartId = req.params.cid;
-
-    const products = req.body;
-
-    const updatedCart = await cartManager.updateCart(cartId, products);
-
-    res.json(updatedCart);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.put("/:cid/products/:pid", async (req, res) => {
-  try {
-    const cartId = req.params.cid;
-    const productId = req.params.pid;
-
-    const { quantity } = req.body;
-
-    if (!quantity || quantity <= 0) {
-      return res.status(400).json({ error: "Cantidad inválida" });
+    const { cid, pid } = req.params;
+    const updatedCart = await cartManager.removeProductFromCart(cid, pid);
+    if (!updatedCart) {
+      return res.status(404).json({ error: "Cart or product not found" });
     }
-
-    const updatedCart = await cartManager.updateProductQuantity(
-      cartId,
-      productId,
-      quantity
-    );
-
-    res.json(updatedCart);
+    res.json({ status: "success", payload: updatedCart });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -100,11 +65,12 @@ router.put("/:cid/products/:pid", async (req, res) => {
 
 router.delete("/:cid", async (req, res) => {
   try {
-    const cartId = req.params.cid;
-
-    const updatedCart = await cartManager.clearCart(cartId);
-
-    res.json(updatedCart);
+    const { cid } = req.params;
+    const result = await cartManager.deleteCart(cid);
+    if (!result) {
+      return res.status(404).json({ error: "Cart not found" });
+    }
+    res.json({ status: "success", message: "Cart deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
