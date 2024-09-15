@@ -8,6 +8,7 @@ import cartsRouter from "./routes/carts.js";
 import { fileURLToPath } from "url";
 import ProductManager from "./class/ProductManager.js";
 import { connectDB } from "./dao/connectDB.js";
+import vistasRouter from "./routes/views.js";
 
 const app = express();
 
@@ -26,11 +27,12 @@ app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/products", productsRouter);
 app.use("/carts", cartsRouter);
+app.use("/", vistasRouter);
 
 app.get("/", async (req, res) => {
   const productManager = new ProductManager();

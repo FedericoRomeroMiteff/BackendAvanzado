@@ -17,16 +17,23 @@ class ProductManager {
     }
   }
 
-  async getProducts(query = {}, options = {}) {
+  async getProducts({ limit = 10, page = 1, sort = {}, query = {} }) {
     try {
-      const products = await Product.paginate(query, options);
-      return products;
+      const options = {
+        limit: parseInt(limit),
+        page: parseInt(page),
+        sort,
+        lean: true,
+      };
+
+      const filter = query.category ? { category: query.category } : {};
+
+      return await Product.paginate(filter, options);
     } catch (error) {
-      console.error("Error al obtener productos:", error);
-      throw error;
+      console.error("Error fetching products:", error);
+      throw new Error(`Error fetching products: ${error.message}`);
     }
   }
-
   async getProductById(id) {
     try {
       const product = await Product.findById(id);

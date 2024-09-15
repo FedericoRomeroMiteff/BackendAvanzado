@@ -8,35 +8,26 @@ router.get("/", async (req, res) => {
   try {
     const { limit = 10, page = 1, sort = "", query = "" } = req.query;
 
-    const limitValue = parseInt(limit, 10) || 10;
-    const pageValue = parseInt(page, 10) || 1;
-    const sortValue = sort === "asc" || sort === "desc" ? sort : "";
-    const queryValue = typeof query === "string" ? query : "";
-
     const options = {
-      limit: limitValue,
-      page: pageValue,
-      sort: sortValue ? { price: sortValue === "asc" ? 1 : -1 } : {},
-      query: queryValue,
+      limit: parseInt(limit, 10),
+      page: parseInt(page, 10),
+      sort:
+        sort === "asc" ? { price: 1 } : sort === "desc" ? { price: -1 } : {},
+      query: query ? { category: query } : {},
     };
 
     const result = await productManager.getProducts(options);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    res.render("home", {
-      products: result.docs,
-      totalPages: result.totalPages,
-      prevPage: result.prevPage,
-      nextPage: result.nextPage,
-      page: result.page,
-      hasPrevPage: result.prevPage > 0,
-      hasNextPage: result.nextPage <= result.totalPages,
-      prevLink: result.prevPage
-        ? `/products?limit=${limit}&page=${result.prevPage}&sort=${sort}&query=${query}`
-        : null,
-      nextLink: result.nextPage
-        ? `/products?limit=${limit}&page=${result.nextPage}&sort=${sort}&query=${query}`
-        : null,
-    });
+router.post("/", async (req, res) => {
+  try {
+    const product = req.body;
+    const newProduct = await productManager.createProduct(product);
+    res.status(201).json(newProduct);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -1,78 +1,44 @@
-import { Router } from "express";
+import express from "express";
 import ProductManager from "../class/ProductManager.js";
-import CartManager from "../class/CartManager.js";
 
-const router = Router();
+const router = express.Router();
 const productManager = new ProductManager();
-const cartManager = new CartManager();
 
 router.get("/products", async (req, res) => {
   try {
     const { limit = 10, page = 1, sort = "", query = "" } = req.query;
+    const filter = query ? { category: String(query) } : {};
+    const options = {
+      limit: parseInt(1, 10),
+      page: parseInt(1, 10),
+      sort:
+        sort === "asc" ? { price: 1 } : sort === "desc" ? { price: -1 } : {},
+    };
 
-    const {
-      docs: products,
-      totalPages,
-      prevPage,
-      nextPage,
-      page: currentPage,
-    } = await productManager.getProducts({
-      limit: parseInt(limit),
-      page: parseInt(page),
-      sort: sort,
-      query: query,
+    const result = await productManager.getProducts({
+      ...options,
+      query: filter,
     });
 
     res.render("products", {
-      title: "Productos",
-      products,
-      totalPages,
-      prevPage,
-      nextPage,
-      page: currentPage,
-      hasPrevPage: prevPage > 0,
-      hasNextPage: nextPage <= totalPages,
-      prevLink: prevPage
-        ? `/products?limit=${limit}&page=${prevPage}&sort=${sort}&query=${query}`
+      products: result.docs,
+      totalPages: result.totalPages,
+      prevPage: result.prevPage,
+      nextPage: result.nextPage,
+      page: result.page,
+      hasPrevPage: result.hasPrevPage,
+      hasNextPage: result.hasNextPage,
+      prevLink: result.hasPrevPage
+        ? `/products?limit=${limit}&page=${result.prevPage}&sort=${sort}&query=${query}`
         : null,
-      nextLink: nextPage
-        ? `/products?limit=${limit}&page=${nextPage}&sort=${sort}&query=${query}`
+      nextLink: result.hasNextPage
+        ? `/products?limit=${limit}&page=${result.nextPage}&sort=${sort}&query=${query}`
         : null,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.get("/products/:pid", async (req, res) => {
-  try {
-    const productId = req.params.pid;
-
-    const product = await productManager.getProductById(productId);
-
-    if (!product) {
-      return res.status(404).json({ error: "Producto no encontrado" });
-    }
-
-    res.render("productDetail", { product });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.get("/carts/:cid", async (req, res) => {
-  try {
-    const cartId = req.params.cid;
-
-    const cart = await cartManager.getCartById(cartId);
-
-    if (!cart) {
-      return res.status(404).json({ error: "Carrito no encontrado" });
-    }
-
-    res.render("cartDetail", { cart });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({ error: `Error fetching products: ${error.message}` });
   }
 });
 

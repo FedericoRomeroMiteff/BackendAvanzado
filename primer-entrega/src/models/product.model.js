@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 const productSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  price: Number,
-  category: String,
-  stock: Number,
+  name: { type: String, required: true },
+  description: { type: String },
+  price: { type: Number, required: true },
+  category: { type: String, required: true },
+  code: { type: String, required: true, unique: true },
+  stock: { type: Number, required: true },
 });
 
 productSchema.plugin(mongoosePaginate);

@@ -2,7 +2,6 @@ import express from "express";
 import CartManager from "../class/CartManager.js";
 
 const router = express.Router();
-
 const cartManager = new CartManager();
 
 router.get("/", async (req, res) => {
@@ -39,12 +38,8 @@ router.post("/", async (req, res) => {
 router.post("/:cid/products/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
-    const { quantity } = req.body;
-    const updatedCart = await cartManager.addProductToCart(cid, pid, quantity);
-    if (!updatedCart) {
-      return res.status(404).json({ error: "Cart or product not found" });
-    }
-    res.json({ status: "success", payload: updatedCart });
+    const result = await cartManager.addProductToCart(cid, pid);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
