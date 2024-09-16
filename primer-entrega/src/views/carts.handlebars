@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Carritos</title>
+</head>
+<body>
+    <h1>Lista de Carritos</h1>
+    <ul>
+        {{#each carts}}
+            <li>Cart ID: {{this._id}}</li>
+        {{/each}}
+    </ul>
+    <a href="/api/products">Volver a la lista de productos</a>
+</body>
+</html>

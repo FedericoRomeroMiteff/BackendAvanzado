@@ -33,24 +33,50 @@ class CartManager {
     }
   }
 
-  async addProductToCart(cartId, productId, quantity) {
+  async addProductToCart(cartId, productId) {
     try {
       const cart = await this.cartModel.findById(cartId);
       if (!cart) {
-        throw new Error(`Carrito con ID ${cartId} no encontrado`);
+        throw new Error("Carrito no encontrado");
       }
-      const productIndex = cart.products.findIndex((p) =>
-        p.productId.equals(productId)
+
+      const productInCart = cart.products.find(
+        (p) => p.product.toString() === productId.toString()
       );
-      if (productIndex > -1) {
-        cart.products[productIndex].quantity += quantity;
+      if (productInCart) {
+        productInCart.quantity += 1;
       } else {
-        cart.products.push({ productId, quantity });
+        cart.products.push({ product: productId, quantity: 1 });
       }
-      return await cart.save();
+
+      await cart.save();
+      return cart;
+    } catch (error) {
+      throw new Error(`Error al agregar producto al carrito: ${error.message}`);
+    }
+  }
+
+  async updateProductQuantityInCart(cartId, productId, quantity) {
+    try {
+      const cart = await this.cartModel.findById(cartId);
+      if (!cart) {
+        throw new Error("Carrito no encontrado");
+      }
+
+      const productInCart = cart.products.find(
+        (p) => p.product.toString() === productId.toString()
+      );
+      if (productInCart) {
+        productInCart.quantity = quantity;
+      } else {
+        cart.products.push({ product: productId, quantity });
+      }
+
+      await cart.save();
+      return cart;
     } catch (error) {
       throw new Error(
-        `Error al agregar el producto al carrito: ${error.message}`
+        `Error al actualizar la cantidad del producto en el carrito: ${error.message}`
       );
     }
   }
@@ -62,7 +88,7 @@ class CartManager {
         throw new Error(`Carrito con ID ${cartId} no encontrado`);
       }
       cart.products = cart.products.filter(
-        (p) => !p.productId.equals(productId)
+        (p) => p.product.toString() !== productId.toString()
       );
       return await cart.save();
     } catch (error) {

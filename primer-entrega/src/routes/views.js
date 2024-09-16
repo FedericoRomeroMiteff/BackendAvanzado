@@ -4,13 +4,25 @@ import ProductManager from "../class/ProductManager.js";
 const router = express.Router();
 const productManager = new ProductManager();
 
+router.get("/", async (req, res) => {
+  try {
+    res.render("home", {
+      title: "Bienvenidos a las vistas",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error fetching home products: ${error.message}` });
+  }
+});
+
 router.get("/products", async (req, res) => {
   try {
     const { limit = 10, page = 1, sort = "", query = "" } = req.query;
     const filter = query ? { category: String(query) } : {};
     const options = {
-      limit: parseInt(1, 10),
-      page: parseInt(1, 10),
+      limit: parseInt(limit),
+      page: parseInt(page),
       sort:
         sort === "asc" ? { price: 1 } : sort === "desc" ? { price: -1 } : {},
     };
@@ -39,6 +51,18 @@ router.get("/products", async (req, res) => {
     res
       .status(500)
       .json({ error: `Error fetching products: ${error.message}` });
+  }
+});
+
+router.get("/products/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await productManager.getProductById(id);
+    res.render("productDetail", { product });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error fetching product details: ${error.message}` });
   }
 });
 

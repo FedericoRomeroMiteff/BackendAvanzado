@@ -6,28 +6,26 @@
   <title>Productos</title>
 </head>
 <body>
-  <h1>Lista de Productos</h1>
-  {{#if products.length}}
-    <ul>
-      {{#each products}}
-        <li>
-          <h2>{{this.title}}</h2>
-          <p>Precio: ${{this.price}}</p>
-          <p>Categoría: {{this.category}}</p>
-          <button><a href="/api/carts/add/{{this._id}}">Agregar al carrito</a></button>
-        </li>
-      {{/each}}
-    </ul>
-    <div>
-      {{#if hasPrevPage}}
-        <a href="{{prevLink}}">Página anterior</a>
-      {{/if}}
-      {{#if hasNextPage}}
-        <a href="{{nextLink}}">Página siguiente</a>
-      {{/if}}
-    </div>
-  {{else}}
-    <p>No se encontraron productos.</p>
-  {{/if}}
+  
+  <ul>
+    {{#each products}}
+      <li>
+        
+        <h2>{{this.name}}</h2>
+        <p>{{this.description}}</p>
+        <p>Price: ${{this.price}}</p>
+        <a href="/productsDetail/{{this._id}}">Ver detalles</a>
+        <a href="/cart/add/{{this._id}}">Agregar al carrito</a>
+      </li>
+    {{/each}}
+  </ul>
+  <div>
+    {{#if hasPrevPage}}
+      <a href="/products?limit={{limit}}&page={{prevPage}}&sort={{sort}}&query={{query}}">Anterior</a>
+    {{/if}}
+    {{#if hasNextPage}}
+      <a href="/products?limit={{limit}}&page={{nextPage}}&sort={{sort}}&query={{query}}">Siguiente</a>
+    {{/if}}
+  </div>
 </body>
 </html>

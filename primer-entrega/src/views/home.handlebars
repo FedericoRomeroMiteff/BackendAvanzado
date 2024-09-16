@@ -6,7 +6,7 @@
 <title>Productos</title>
 </head>
 <body>
-<h1>Lista de Productos</h1>
+
 
 <ul>
     {{#each products}}
@@ -14,7 +14,7 @@
         <h2>{{this.name}}</h2>
         <p>Precio: ${{this.price}}</p>
         <p>Categoría: {{this.category}}</p>
-        <button><a href="/products/{{this._id}}">Ver detalles</a></button>
+        <button><a href="/productsDetail{{this._id}}">Ver detalles</a></button>
         <button><a href="/cart/add/{{this._id}}">Agregar al carrito</a></button>
       </li>
     {{/each}}

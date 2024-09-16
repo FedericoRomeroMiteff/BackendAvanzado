@@ -7,20 +7,30 @@ const cartManager = new CartManager();
 router.get("/", async (req, res) => {
   try {
     const carts = await cartManager.getAllCarts();
-    res.json({ status: "success", payload: carts });
+    res.render("carts", { carts });
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching carts: ${error.message}` });
+  }
+});
+
+router.get("/:cartId", async (req, res) => {
+  const { cartId } = req.params;
+  try {
+    const cart = await cartManager.getCartById(cartId);
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
+    }
+    res.json({ status: "success", payload: cart });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.get("/:cid", async (req, res) => {
+router.post("/:cartId/products/:productId", async (req, res) => {
+  const { cartId, productId } = req.params;
   try {
-    const { cid } = req.params;
-    const cart = await cartManager.getCartById(cid);
-    if (!cart) {
-      return res.status(404).json({ error: "Cart not found" });
-    }
-    res.json({ status: "success", payload: cart });
+    const updatedCart = await cartManager.addProductToCart(cartId, productId);
+    res.status(200).json(updatedCart);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -35,20 +45,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/:cid/products/:pid", async (req, res) => {
+router.delete("/:cartId/products/:productId", async (req, res) => {
+  const { cartId, productId } = req.params;
   try {
-    const { cid, pid } = req.params;
-    const result = await cartManager.addProductToCart(cid, pid);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.delete("/:cid/products/:pid", async (req, res) => {
-  try {
-    const { cid, pid } = req.params;
-    const updatedCart = await cartManager.removeProductFromCart(cid, pid);
+    const updatedCart = await cartManager.removeProductFromCart(
+      cartId,
+      productId
+    );
     if (!updatedCart) {
       return res.status(404).json({ error: "Cart or product not found" });
     }
@@ -58,16 +61,34 @@ router.delete("/:cid/products/:pid", async (req, res) => {
   }
 });
 
-router.delete("/:cid", async (req, res) => {
+router.delete("/:cartId", async (req, res) => {
+  const { cartId } = req.params;
   try {
-    const { cid } = req.params;
-    const result = await cartManager.deleteCart(cid);
+    const result = await cartManager.deleteCart(cartId);
     if (!result) {
       return res.status(404).json({ error: "Cart not found" });
     }
     res.json({ status: "success", message: "Cart deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.put("/:cartId/products/:productId", async (req, res) => {
+  const { cartId, productId } = req.params;
+  const { quantity } = req.body;
+
+  try {
+    const updatedCart = await cartManager.updateProductQuantityInCart(
+      cartId,
+      productId,
+      quantity
+    );
+    res.json(updatedCart);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error al actualizar el carrito: ${error.message}` });
   }
 });
 

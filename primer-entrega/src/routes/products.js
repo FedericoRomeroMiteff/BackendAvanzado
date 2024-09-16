@@ -17,9 +17,29 @@ router.get("/", async (req, res) => {
     };
 
     const result = await productManager.getProducts(options);
-    res.json(result);
+    res.render("products", {
+      products: result.docs,
+      title: "Lista de Productos",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await productManager.getProductById(productId);
+
+    if (!product) {
+      return res.status(404).send("Producto no encontrado");
+    }
+
+    res.render("productDetail", { product });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error al obtener el producto: ${error.message}` });
   }
 });
 
@@ -33,4 +53,40 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const updatedProduct = await productManager.updateProduct(
+      productId,
+      req.body
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).send("Producto no encontrado");
+    }
+
+    res.json({ status: "success", payload: updatedProduct });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error al actualizar el producto: ${error.message}` });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const result = await productManager.deleteProduct(productId);
+
+    if (!result) {
+      return res.status(404).send("Producto no encontrado");
+    }
+
+    res.json({ status: "success", message: "Producto eliminado" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: `Error al eliminar el producto: ${error.message}` });
+  }
+});
 export default router;
