@@ -58,12 +58,17 @@ class CartManager {
 
   async updateCart(cartId, updateData) {
     try {
-      const cart = await this.cartModel.findById(cartId);
-      if (!cart) {
-        return null;
+      const cart = await CartModel.findById(cartId);
+      if (!cart) return null;
+
+      for (let item of updateData.items) {
+        const productExists = await ProductModel.findById(item.productId);
+        if (!productExists) {
+          throw new Error(`Producto con ID ${item.productId} no existe`);
+        }
       }
-      Object.assign(cart, updateData);
-      return await cart.save();
+      const updatedCart = await cart.save();
+      return updatedCart;
     } catch (error) {
       throw new Error(`Error al actualizar el carrito: ${error.message}`);
     }
@@ -113,11 +118,15 @@ class CartManager {
 
   async deleteCart(cartId) {
     try {
-      return await this.cartModel.findByIdAndDelete(cartId);
+      const cart = await CartModel.findById(cartId);
+      if (!cart) {
+        throw new Error(`Carrito con ID ${cartId} no encontrado`);
+      }
+
+      await CartModel.deleteOne({ _id: cartId });
+      return { message: `Carrito con ID ${cartId} eliminado correctamente` };
     } catch (error) {
-      throw new Error(
-        `Error al eliminar el carrito con ID ${cartId}: ${error.message}`
-      );
+      throw new Error("Error al eliminar el carrito: " + error.message);
     }
   }
 }

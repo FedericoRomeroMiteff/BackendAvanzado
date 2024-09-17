@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  title: { type: String, required: true },
   description: { type: String },
   price: { type: Number, required: true },
   category: { type: String, required: true },

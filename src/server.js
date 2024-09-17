@@ -96,7 +96,6 @@ app.get("/test-db", async (req, res) => {
 });
 
 const PORT = 8080;
-
 server.listen(PORT, () => {
-  console.log(`Servidor online en puerto http://localhost:${PORT}`);
+  console.log(`Servidor online en puerto ${PORT}`);
 });

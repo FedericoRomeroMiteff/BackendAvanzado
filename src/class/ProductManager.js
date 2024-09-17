@@ -4,7 +4,7 @@ class ProductManager {
   async createProduct(productData) {
     try {
       const {
-        name,
+        title,
         description,
         price,
         category,
@@ -14,7 +14,7 @@ class ProductManager {
         status,
       } = productData;
       if (
-        !name ||
+        !title ||
         !description ||
         !price ||
         !category ||
