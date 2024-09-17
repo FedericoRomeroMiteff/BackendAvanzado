@@ -92,4 +92,17 @@ router.put("/:cartId/products/:productId", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const cartId = req.params.id;
+    const updatedCart = await cartManager.updateCart(cartId, req.body);
+    if (!updatedCart) {
+      return res.status(404).send("Carrito no encontrado");
+    }
+    res.json({ status: "success", payload: updatedCart });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

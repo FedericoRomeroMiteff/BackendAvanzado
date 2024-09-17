@@ -56,6 +56,19 @@ class CartManager {
     }
   }
 
+  async updateCart(cartId, updateData) {
+    try {
+      const cart = await this.cartModel.findById(cartId);
+      if (!cart) {
+        return null;
+      }
+      Object.assign(cart, updateData);
+      return await cart.save();
+    } catch (error) {
+      throw new Error(`Error al actualizar el carrito: ${error.message}`);
+    }
+  }
+
   async updateProductQuantityInCart(cartId, productId, quantity) {
     try {
       const cart = await this.cartModel.findById(cartId);

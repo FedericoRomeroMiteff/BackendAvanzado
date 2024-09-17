@@ -1,19 +1,40 @@
 import Product from "../models/product.model.js";
 
 class ProductManager {
-  async addProduct(product) {
+  async createProduct(productData) {
     try {
-      const existingProduct = await Product.findOne({ title: product.title });
+      const {
+        name,
+        description,
+        price,
+        category,
+        code,
+        stock,
+        thumbnail,
+        status,
+      } = productData;
+      if (
+        !name ||
+        !description ||
+        !price ||
+        !category ||
+        !code ||
+        !stock ||
+        !thumbnail ||
+        !status
+      ) {
+        throw new Error("Todos los campos son obligatorios");
+      }
+      const existingProduct = await Product.findOne({ code });
       if (existingProduct) {
-        throw new Error("El producto ya existe");
+        throw new Error("El código ya existe");
       }
 
-      const newProduct = new Product(product);
+      const newProduct = new Product(productData);
       await newProduct.save();
       return newProduct;
     } catch (error) {
-      console.error("Error al agregar producto:", error);
-      throw error;
+      throw new Error(`Error al crear el producto: ${error.message}`);
     }
   }
 
