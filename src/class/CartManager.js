@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Cart from "../models/cart.model.js";
+import Cart from "../dao/models/cart.model.js";
 
 class CartManager {
   constructor() {

@@ -1,4 +1,4 @@
-import Product from "../models/product.model.js";
+import Product from "../dao/models/product.model.js";
 
 class ProductManager {
   async createProduct(productData) {

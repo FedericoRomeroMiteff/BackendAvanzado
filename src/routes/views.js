@@ -1,7 +1,7 @@
-import express from "express";
+import { Router } from "express";
 import ProductManager from "../class/ProductManager.js";
 
-const router = express.Router();
+const router = Router();
 const productManager = new ProductManager();
 
 router.get("/", async (req, res) => {
@@ -14,6 +14,14 @@ router.get("/", async (req, res) => {
       .status(500)
       .json({ error: `Error fetching home products: ${error.message}` });
   }
+});
+
+router.get("/login", (req, res) => {
+  res.status(200).render("login", {});
+});
+
+router.get("/register", (req, res) => {
+  res.status(200).render("register", {});
 });
 
 router.get("/products", async (req, res) => {
