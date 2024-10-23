@@ -21,3 +21,5 @@ export const authTokenMiddleware = (req, res, next) => {
     next();
   });
 };
+
+export default PRIVATE_KEY;

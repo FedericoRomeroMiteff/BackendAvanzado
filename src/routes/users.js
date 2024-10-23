@@ -1,6 +1,7 @@
 import { Router } from "express";
-import UsersMongo from "../dao/usersMongo.js"; // Asegúrate de que la extensión .js esté incluida
-import { authTokenMiddleware } from "../utils/jwt.js"; // Asegúrate de que la extensión .js esté incluida
+import UsersMongo from "../dao/usersMongo.js";
+import { authTokenMiddleware } from "../utils/jwt.js";
+import passportCall from "../utils/passportCall.js";
 
 const router = Router();
 const userService = new UsersMongo();
@@ -22,6 +23,12 @@ router
   })
   .get("/:uid", async (req, res) => {
     res.send("users");
+  })
+  .get("/profile", passportCall("current", { session: false }), (req, res) => {
+    res.send({
+      status: "success",
+      user: req.user,
+    });
   })
   .post("/", async (req, res) => {
     const newUser = req.body;

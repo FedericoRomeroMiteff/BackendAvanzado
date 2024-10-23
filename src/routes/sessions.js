@@ -2,6 +2,7 @@ import { Router } from "express";
 import UsersMongo from "../dao/usersMongo.js";
 import { createHash, isValidPassword } from "../utils/hash.js";
 import { generateToken } from "../utils/jwt.js";
+import passportCall from "../utils/passportCall.js";
 
 const router = Router();
 const usersService = new UsersMongo();
@@ -71,7 +72,10 @@ router.post("/login", async (req, res) => {
     email: userFound.email,
     role: userFound.role === "admin",
   });
-
+  res.cookie("token", token, {
+    maxAge: 1000 * 60 * 60 * 24,
+    httpOnly: true,
+  });
   res.send({
     status: "success",
     message: "Logged",
@@ -95,8 +99,8 @@ router.get("/logout", (req, res) => {
   });
   res.send("logout");
 });
-router.get("/current", (req, res) => {
-  res.send("Datos sensibles");
+router.get("/current", passportCall("jwt"), (req, res) => {
+  res.send({ dataUser: req.user, message: "Datos sensibles" });
 });
 
 router.post("/logout", (req, res) => {
