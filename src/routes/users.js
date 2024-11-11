@@ -1,55 +1,26 @@
 import { Router } from "express";
-import UsersMongo from "../dao/usersMongo.js";
-import { authTokenMiddleware } from "../utils/jwt.js";
-import passportCall from "../utils/passportCall.js";
+import passportCall from "../middleware/passport/passportCall.js";
+import UsersController from "../controllers/users.controller.js";
 
 const router = Router();
-const userService = new UsersMongo();
 
-router
-  .get("/", authTokenMiddleware, async (req, res) => {
-    try {
-      const users = await userService.getUsers();
-      res.send({
-        status: "success",
-        payload: users,
-      });
-    } catch (error) {
-      console.log(error);
-      res
-        .status(500)
-        .send({ status: "error", message: "Internal Server Error" });
-    }
-  })
-  .get("/:uid", async (req, res) => {
-    res.send("users");
-  })
-  .get("/profile", passportCall("current", { session: false }), (req, res) => {
-    res.send({
-      status: "success",
-      user: req.user,
-    });
-  })
-  .post("/", async (req, res) => {
-    const newUser = req.body;
-    try {
-      const result = await userService.createUser(newUser);
-      res.send({
-        status: "success",
-        payload: result,
-      });
-    } catch (error) {
-      console.log(error);
-      res
-        .status(500)
-        .send({ status: "error", message: "Internal Server Error" });
-    }
-  })
-  .put("/:uid", async (req, res) => {
-    res.send("users");
-  })
-  .delete("/:uid", async (req, res) => {
-    res.send("users");
-  });
+function auth(req, res, next) {
+  req.user = {
+    name: "Usuario1",
+    role: "Administrador",
+  };
+  if (req.user.role !== "Administrador") {
+    return res.send("No es administrador");
+  }
+  next();
+}
 
+const { getUser, getUsers, createUser, updateUser, deleteUser } =
+  new UsersController();
+
+router.get("/", passportCall("jwt"), getUsers);
+router.get("/", getUsers);
+router.post("/", createUser);
+router.put("/:uid", updateUser);
+router.delete("/:uid", deleteUser);
 export default router;

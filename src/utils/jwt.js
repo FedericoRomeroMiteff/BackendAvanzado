@@ -14,8 +14,8 @@ export const authTokenMiddleware = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
   jwt.verify(token, PRIVATE_KEY, (error, dataToken) => {
-    if (dataToken.role !== "admin") {
-      return res.send("chau");
+    if (dataToken.role !== "Administrador") {
+      return res.send("No es administrador");
     }
     req.user = dataToken;
     next();

@@ -2,7 +2,7 @@ import { Router } from "express";
 import UsersMongo from "../dao/usersMongo.js";
 import { createHash, isValidPassword } from "../utils/hash.js";
 import { generateToken } from "../utils/jwt.js";
-import passportCall from "../utils/passportCall.js";
+import passportCall from "../middleware/passport/passportCall.js";
 
 const router = Router();
 const usersService = new UsersMongo();

@@ -4,8 +4,9 @@ import pkg from "passport-jwt";
 const { Strategy: JWTStrategy, ExtractJwt } = pkg;
 import UsersMongo from "../dao/usersMongo.js";
 import { createHash, isValidPassword } from "../utils/validatePassword.js";
-import jwt from "passport-jwt";
-import PRIVATE_KEY from "../utils/jwt.js";
+import jwt from "jsonwebtoken";
+import config from "dotenv";
+import UserDTO from "../dto/users.dto.js";
 
 const userService = new UsersMongo();
 
@@ -17,22 +18,25 @@ const initializePassport = () => {
     }
     return token;
   };
+
   passport.use(
     "jwt",
     new JWTStrategy(
       {
         jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-        secretOrKey: PRIVATE_KEY,
+        secretOrKey: config.PRIVATE_KEY,
       },
       async (jwt_payload, done) => {
         try {
-          return done(null, jwt_payload);
+          const userDTO = new UserDTO(jwt_payload);
+          return done(null, userDTO);
         } catch (error) {
           return done(error);
         }
       }
     )
   );
+
   passport.use(
     "register",
     new LocalStrategy(
@@ -44,7 +48,8 @@ const initializePassport = () => {
         const { first_name, last_name } = req.body;
         try {
           let userFound = await userService.getUser({ email: username });
-          if (userFound) return done(null, false);
+          if (userFound)
+            return done(null, false, { message: "User already exists" });
           let newUser = {
             first_name,
             last_name,
@@ -52,7 +57,7 @@ const initializePassport = () => {
             password: createHash(password),
           };
           let result = await userService.createUser(newUser);
-          return done(null, result);
+          return done(null, new UserDTO(result));
         } catch (error) {
           return done("Error al crear un usuario: " + error);
         }
@@ -69,11 +74,10 @@ const initializePassport = () => {
       async (username, password, done) => {
         try {
           const user = await userService.getUser({ email: username });
-          if (!user) return done(null, false);
-
+          if (!user) return done(null, false, { message: "Incorrect email" });
           if (!isValidPassword(password, user.password))
-            return done(null, false);
-          return done(null, user);
+            return done(null, false, { message: "Incorrect password" });
+          return done(null, new UserDTO(user));
         } catch (error) {
           return done(error);
         }
@@ -83,21 +87,16 @@ const initializePassport = () => {
 
   passport.use(
     "current",
-    new LocalStrategy(
+    new JWTStrategy(
       {
-        passReqToCallback: true,
-        usernameField: "email",
+        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
+        secretOrKey: config.PRIVATE_KEY,
       },
-      async (req, _, __, done) => {
-        const token = req.cookies["jwtToken"];
-        if (!token) {
-          return done(null, false, { message: "No token provided" });
-        }
+      async (jwt_payload, done) => {
         try {
-          const decoded = jwt.verify(token, "secretCoder");
-          const user = await userService.getUser({ email: decoded.email });
+          const user = await userService.getUser({ email: jwt_payload.email });
           if (!user) return done(null, false);
-          return done(null, user);
+          return done(null, new UserDTO(user));
         } catch (error) {
           return done(error, false);
         }
@@ -111,8 +110,8 @@ const initializePassport = () => {
 
   passport.deserializeUser(async (id, done) => {
     let user = await userService.getUser({ _id: id });
-    done(null, user);
+    done(null, new UserDTO(user));
   });
 };
 
-export { initializePassport };
+export default initializePassport;
