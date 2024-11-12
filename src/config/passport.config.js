@@ -4,9 +4,10 @@ import pkg from "passport-jwt";
 const { Strategy: JWTStrategy, ExtractJwt } = pkg;
 import UsersMongo from "../dao/usersMongo.js";
 import { createHash, isValidPassword } from "../utils/validatePassword.js";
-import jwt from "jsonwebtoken";
-import config from "dotenv";
+import dotenv from "dotenv";
 import UserDTO from "../dto/users.dto.js";
+
+dotenv.config();
 
 const userService = new UsersMongo();
 
@@ -24,7 +25,7 @@ const initializePassport = () => {
     new JWTStrategy(
       {
         jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-        secretOrKey: config.PRIVATE_KEY,
+        secretOrKey: process.env.PRIVATE_KEY,
       },
       async (jwt_payload, done) => {
         try {
@@ -90,7 +91,7 @@ const initializePassport = () => {
     new JWTStrategy(
       {
         jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-        secretOrKey: config.PRIVATE_KEY,
+        secretOrKey: process.env.PRIVATE_KEY,
       },
       async (jwt_payload, done) => {
         try {
