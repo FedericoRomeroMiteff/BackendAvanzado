@@ -1,7 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import pkg from "passport-jwt";
-const { Strategy: JWTStrategy, ExtractJwt } = pkg;
+import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt';
 import UsersMongo from "../dao/usersMongo.js";
 import { createHash, isValidPassword } from "../utils/validatePassword.js";
 import dotenv from "dotenv";
@@ -19,7 +18,7 @@ const initializePassport = () => {
     }
     return token;
   };
-
+  
   passport.use(
     "jwt",
     new JWTStrategy(

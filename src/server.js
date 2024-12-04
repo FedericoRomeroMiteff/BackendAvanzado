@@ -31,7 +31,7 @@ app.use(logger("dev"));
 app.use(cors());
 
 initializePassport();
-app.use(passport.initialize());
+app.use(passport.initialize()); 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,13 +41,16 @@ app.set("view engine", "handlebars");
 
 connectDB();
 
+
 app.use(appRouter);
 app.use("/auth", authRoutes);
-const userRouter = new UserRouter();
 app.use("/", viewsRouter);
 app.use("/pruebas", pruebaRouter);
-app.use("/api/users", userRouter.getRouter());
-app.use("/api/products", productRouter);
+
+
+app.use("/api/products", passport.authenticate('jwt', { session: false }), productRouter);
+const userRouter = new UserRouter();
+app.use("/api/users", passport.authenticate('jwt', { session: false }), userRouter.getRouter());
 app.use("/api/sessions", sessionsRouter);
 
 app.use((error, req, res, next) => {
